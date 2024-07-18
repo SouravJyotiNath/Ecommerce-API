@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -55,5 +56,30 @@ public class ProductController {
         return ResponseEntity.ok()
                 .contentType(MediaType.valueOf(product.getImgType()))
                 .body(img);
+    }
+
+    @PutMapping("products/{id}")
+    public ResponseEntity<String> updateProduct(@PathVariable int id, @RequestBody Product product, @RequestPart MultipartFile img){
+        Product product1 = null;
+        try {
+            product1 = service.updateProduct(id, product, img);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if(product1 != null){
+            return new ResponseEntity<>("Updated", HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>("Filed to Update", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<String> deleteProduct(@PathVariable int id){
+        Product product = service.getOneProduct(id);
+        if(product != null) {
+            service.deleteProduct(id);
+            return new ResponseEntity<>("Deleted", HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>("Product Not Found", HttpStatus.NOT_FOUND);
+        }
     }
 }
